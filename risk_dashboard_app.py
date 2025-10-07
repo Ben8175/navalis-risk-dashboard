@@ -1,13 +1,25 @@
-# risk_dashboard_app.py
-import pandas as pd
 import streamlit as st
+import pandas as pd
 from datetime import datetime
 
-# --- 1. PAGE CONFIG ---
-st.set_page_config(page_title="Navalis Capital Risk Dashboard", layout="wide")
+# --- ALWAYS FIRST: page config ---
+st.set_page_config(page_title="Navalis Risk Dashboard", layout="wide")
 
+# --- DEBUG build tag (doit s'afficher si la nouvelle version est bien déployée) ---
+st.write(f"🛠 build: {datetime.utcnow().isoformat(timespec='seconds')}Z")
+
+# --- PASSWORD PROTECTION ---
+# essaie d'utiliser le secret Streamlit Cloud ; sinon mot de passe de secours
+SECRET = st.secrets.get("auth", {}).get("password", None) or "navalis2025"
+
+pwd = st.text_input("🔐 Enter access password", type="password")
+if pwd != SECRET:
+    st.warning("Unauthorized access. Please enter the correct password.")
+    st.stop()
+
+# --- (après validation) HEADER ---
 st.title("⚓ Navalis Capital Risk Dashboard")
-st.caption(f"As of {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+st.caption(f"As of {datetime.now():%Y-%m-%d %H:%M}")
 
 # --- 2. PARAMETERS ---
 TOTAL_CAPITAL = st.number_input("Total Capital (USD)", value=200000.00, step=1000.0)
