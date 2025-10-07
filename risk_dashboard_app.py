@@ -5,17 +5,35 @@ from datetime import datetime
 # --- ALWAYS FIRST: page config ---
 st.set_page_config(page_title="Navalis Risk Dashboard", layout="wide")
 
-# --- DEBUG build tag (doit s'afficher si la nouvelle version est bien déployée) ---
-st.write(f"🛠 build: {datetime.utcnow().isoformat(timespec='seconds')}Z")
+# 1) page config doit rester tout en haut (tu l'as déjà)
 
-# --- PASSWORD PROTECTION ---
-# essaie d'utiliser le secret Streamlit Cloud ; sinon mot de passe de secours
-SECRET = st.secrets.get("auth", {}).get("password", None) or "navalis2025"
+# 2) petit helper pour l'auth
+def _check_password():
+    SECRET = st.secrets.get("auth", {}).get("password", None) or "navalis2025"
 
-pwd = st.text_input("🔐 Enter access password", type="password")
-if pwd != SECRET:
-    st.warning("Unauthorized access. Please enter the correct password.")
-    st.stop()
+    # centre un petit module de login et cache le label
+    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+    pwd = st.text_input("Enter access password", type="password", label_visibility="collapsed")
+    ok = st.button("Enter")
+
+    if ok:
+        if pwd == SECRET:
+            st.session_state.authed = True
+            st.experimental_rerun()
+        else:
+            st.error("Wrong password.")
+            st.stop()
+    else:
+        st.stop()  # stoppe le rendu tant que non connecté
+
+# 3) état d'auth dans la session
+if "authed" not in st.session_state:
+    st.session_state.authed = False
+
+# 4) si pas encore loggé, on affiche UNIQUEMENT le mini login (pas de build tag)
+if not st.session_state.authed:
+    _check_password()
+    # la fonction ci-dessus fait st.stop(); donc rien d'autre ne s'affiche
 
 # --- (après validation) HEADER ---
 st.title("⚓ Navalis Capital Risk Dashboard")
