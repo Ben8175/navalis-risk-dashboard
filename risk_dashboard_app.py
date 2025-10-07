@@ -33,18 +33,8 @@ if "authed" not in st.session_state:
 if not st.session_state.authed:
     _check_password()
 
-# Logout button (optional, appears once logged in)
-with st.sidebar:
-    if st.button("Log out"):
-        st.session_state.clear()
-        st.rerun()
-
 # --- After validation: HEADER ---
-st.title("⚓ Navalis Capital Risk Dashboard")
-st.caption(f"As of {datetime.now():%Y-%m-%d %H:%M}")
-
-# --- (après validation) HEADER ---
-st.title("⚓ Navalis Capital Risk Dashboard")
+st.title("⚓ Navalis Capital - Risk Dashboard")
 st.caption(f"As of {datetime.now():%Y-%m-%d %H:%M}")
 
 # --- 2. PARAMETERS ---
