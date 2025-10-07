@@ -5,35 +5,43 @@ from datetime import datetime
 # --- ALWAYS FIRST: page config ---
 st.set_page_config(page_title="Navalis Risk Dashboard", layout="wide")
 
-# 1) page config doit rester tout en haut (tu l'as déjà)
-
-# 2) petit helper pour l'auth
+# --- AUTH: show login, hide everything after success ---
 def _check_password():
     SECRET = st.secrets.get("auth", {}).get("password", None) or "navalis2025"
 
-    # centre un petit module de login et cache le label
+    # Small, clean login UI
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-    pwd = st.text_input("Enter access password", type="password", label_visibility="collapsed")
-    ok = st.button("Enter")
+    pwd = st.text_input("Enter access password", type="password",
+                        label_visibility="collapsed", key="pwd")
+    ok = st.button("Enter", key="enter")
 
     if ok:
         if pwd == SECRET:
             st.session_state.authed = True
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Wrong password.")
             st.stop()
     else:
-        st.stop()  # stoppe le rendu tant que non connecté
+        st.stop()  # stop rendering until password is entered
 
-# 3) état d'auth dans la session
+# Session flag
 if "authed" not in st.session_state:
     st.session_state.authed = False
 
-# 4) si pas encore loggé, on affiche UNIQUEMENT le mini login (pas de build tag)
+# Gate: if not authenticated, show only login
 if not st.session_state.authed:
     _check_password()
-    # la fonction ci-dessus fait st.stop(); donc rien d'autre ne s'affiche
+
+# Logout button (optional, appears once logged in)
+with st.sidebar:
+    if st.button("Log out"):
+        st.session_state.clear()
+        st.rerun()
+
+# --- After validation: HEADER ---
+st.title("⚓ Navalis Capital Risk Dashboard")
+st.caption(f"As of {datetime.now():%Y-%m-%d %H:%M}")
 
 # --- (après validation) HEADER ---
 st.title("⚓ Navalis Capital Risk Dashboard")
